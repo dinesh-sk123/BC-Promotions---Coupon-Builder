@@ -527,3 +527,16 @@ if ($promotion_type == 'Builder') {
         wp_reset_query();
     endif;
 }
+
+require 'plugin-update-checker/plugin-update-checker.php';
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+	'https://github.com/dinesh-sk123/BC-Promotions---Coupon-Builder',
+	__FILE__,
+	'bc-promotions'
+);
+
+//Set the branch that contains the stable release.
+$myUpdateChecker->setBranch('master');
+
