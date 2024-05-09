@@ -3,7 +3,7 @@
  * Plugin Name:       BC Promotions - Coupon Builder
  * Plugin URI:        https://github.com/nikhil-twinspark/bc-promotions
  * Description:       A simple plugin for creating coupons for promotion.
- * Version:           2.0.0
+ * Version:           3.0.0
  * Author:            Blue Corona
  * Author URI:        #
  * License:           AGPL-3.0
@@ -529,6 +529,7 @@ if ($promotion_type == 'Builder') {
 }
 
 require ABSPATH . 'plugin-update-checker/plugin-update-checker.php';
+
 use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
 $myUpdateChecker = PucFactory::buildUpdateChecker(
