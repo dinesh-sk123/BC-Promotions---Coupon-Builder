@@ -3,7 +3,7 @@
  * Plugin Name:       BC Promotions - Coupon Builder
  * Plugin URI:        https://github.com/nikhil-twinspark/bc-promotions
  * Description:       A simple plugin for creating coupons for promotion.
- * Version:           5.0.0
+ * Version:           2.0.0
  * Author:            Blue Corona
  * Author URI:        #
  * License:           AGPL-3.0
@@ -166,7 +166,7 @@ navigation: {
     nextEl: '.coupon-btn-next',
     prevEl: '.coupon-btn-prev',
 },
- slidesPerView: 3,
+ slidesPerView: 2,
     loop: true,
     speed: 400,
     // autoplay: true,
