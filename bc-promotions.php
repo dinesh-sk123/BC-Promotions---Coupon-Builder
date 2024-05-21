@@ -3,7 +3,7 @@
  * Plugin Name:       BC Promotions - Coupon Builder
  * Plugin URI:        https://github.com/nikhil-twinspark/bc-promotions
  * Description:       A simple plugin for creating coupons for promotion.
- * Version:           6.0.0
+ * Version:           6.1.0
  * Author:            Blue Corona
  * Author URI:        #
  * License:           AGPL-3.0
@@ -528,16 +528,91 @@ if ($promotion_type == 'Builder') {
     endif;
 }
 
-require ABSPATH . 'wp-content/plugin-update-checker/plugin-update-checker.php';
+//require ABSPATH . 'wp-content/plugin-update-checker/plugin-update-checker.php';
 
-use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+//use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 
-$myUpdateChecker = PucFactory::buildUpdateChecker(
-	'https://github.com/dinesh-sk123/BC-Promotions---Coupon-Builder',
-	__FILE__,
-	'bc-promotions'
-);
+//$myUpdateChecker = PucFactory::buildUpdateChecker(
+//	'https://github.com/dinesh-sk123/BC-Promotions---Coupon-Builder',
+//	__FILE__,
+//	'bc-promotions'
+//);
 
 //Set the branch that contains the stable release.
-$myUpdateChecker->setBranch('master');
+//$myUpdateChecker->setBranch('master');
+class GitHub_Update_Checker {
+    private $user;
+    private $repo;
+    private $current_version;
+    private $plugin_slug;
+    private $plugin_file;
+
+    public function __construct($user, $repo, $current_version, $plugin_slug, $plugin_file) {
+        $this->user = $user;
+        $this->repo = $repo;
+        $this->current_version = $current_version;
+        $this->plugin_slug = $plugin_slug;
+        $this->plugin_file = $plugin_file;
+        add_filter('pre_set_site_transient_update_plugins', [$this, 'check_for_update']);
+        add_filter('plugins_api', [$this, 'plugin_popup'], 10, 3);
+    }
+
+    private function get_latest_release() {
+        $url = "https://api.github.com/repos/{$this->user}/{$this->repo}/releases/latest";
+        $response = wp_remote_get($url);
+        if (is_wp_error($response)) {
+            return false;
+        }
+        $body = wp_remote_retrieve_body($response);
+        return json_decode($body);
+    }
+
+    public function check_for_update($transient) {
+        if (empty($transient->checked)) {
+            return $transient;
+        }
+
+        $release = $this->get_latest_release();
+        if ($release && version_compare($this->current_version, $release->tag_name, '<')) {
+            $obj = new stdClass();
+            $obj->slug = $this->plugin_slug;
+            $obj->new_version = $release->tag_name;
+            $obj->url = $release->html_url;
+            $obj->package = $release->zipball_url;
+            $transient->response[$this->plugin_file] = $obj;
+        }
+        return $transient;
+    }
+
+    public function plugin_popup($result, $action, $args) {
+        if ('plugin_information' !== $action) {
+            return $result;
+        }
+
+        if ($this->plugin_slug !== $args->slug) {
+            return $result;
+        }
+
+        $release = $this->get_latest_release();
+        if (!$release) {
+            return $result;
+        }
+
+        $result = new stdClass();
+        $result->name = $release->name;
+        $result->slug = $this->plugin_slug;
+        $result->version = $release->tag_name;
+        $result->author = 'Your Name';
+        $result->homepage = $release->html_url;
+        $result->sections = [
+            'description' => $release->body,
+        ];
+        $result->download_link = $release->zipball_url;
+
+        return $result;
+    }
+}
+
+// Usage
+new GitHub_Update_Checker('dinesh-sk123', 'BC-Promotions---Coupon-Builder', 'v3.2.2-qa', 'bc-promotions', 'bluecorona-plugin-promotions-master/bc-promotions.php');
 
